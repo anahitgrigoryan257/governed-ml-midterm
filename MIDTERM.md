@@ -1,8 +1,8 @@
 # BANA 690A Midterm: Written Answers
 
-**Name:**
-**Last-name group (A to H, I to P, Q to Z):**
-**GitHub username:**
+**Name: Anahit Grigoryan**
+**Last-name group (A to H, I to P, Q to Z): A to H**
+**GitHub username: anahitgrigoryan257**
 
 This file is half of your exam. The code and the pipeline grade the other half.
 Write in full sentences. Cite evidence from THIS repository: a file name, a line,
@@ -53,11 +53,15 @@ Three suspect columns. For each, give your ruling and the evidence.
 
 ## Lab 4: Run v1 and v2, explain the block
 
-**4.1** Paste the DECISION line and overall AUC for v1 and for v2.
+**4.1**
+- v1: overall AUC `0.7046`; `DECISION: PASS. This model may proceed to deployment review.`
+- v2: overall AUC `0.7224`; `DECISION: BLOCKED. This model may NOT be deployed.`
 
-**4.2** v2 has the higher AUC. Why is it blocked? Point to the exact line in `data/generate_data.py` that creates `territory_risk_index`, and the line that creates the label's rural penalty.
+**4.2**
+- [data/generate_data.py](data/generate_data.py#L136): `territory_risk_index = np.clip(42 + 30 * rural + rng.normal(0, 8, n), 0, 100).round(1)` generates the index; the data dictionary names its source as a third-party vendor, and rural applicants receive higher values on average.
+- [data/generate_data.py](data/generate_data.py#L132): `logit = 1.35 + z - 1.10 * rural + rng.normal(0, 1.05, n)` applies an explicit negative rural term to the score used to create the historical label.
 
-**4.3** v2 passed `no_prohibited_features`. Explain why a preventive list check cannot catch a proxy, and name the detective check that did.
+**4.3** `no_prohibited_features` compares feature names against a fixed list, and `territory_risk_index` is not itself named as a prohibited feature even though it acts as a rural proxy. The outcome-based detective checks caught the resulting disparity: v2 failed `subgroup_auc[rural]` (`0.5937` < `0.64`), `subgroup_tpr[rural]` (`0.5588` < `0.70`), `approval_disparity_ratio` (`0.5596` < `0.80`), and `tpr_ratio` (`0.5888` < `0.80`).
 
 ---
 
